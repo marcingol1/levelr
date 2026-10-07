@@ -30,6 +30,16 @@ interface Pt {
 
 const PAD = 56; // px reserved around the terrace for dimension lines
 const HIT = 14; // px pick radius for legs
+/** Outer band of a tile (fraction of its size) that targets an edge or corner instead of the whole tile. */
+const EDGE = 0.28;
+
+interface Hover {
+  node?: Node;
+  tile?: Tile;
+  /** Legs a click here would paint. */
+  keys: string[];
+  px: Pt;
+}
 
 export function Plan({ project, layout, summary, tool, setTool, brush, gradient, setGradient, unit, dispatch }: Props) {
   const { t } = useT();
@@ -37,7 +47,7 @@ export function Plan({ project, layout, summary, tool, setTool, brush, gradient,
   const svgRef = useRef<SVGSVGElement>(null);
   const [size, setSize] = useState({ w: 800, h: 560 });
   const [drag, setDrag] = useState<{ a: Pt; b: Pt } | null>(null);
-  const [hover, setHover] = useState<{ node?: Node; tile?: Tile; px: Pt } | null>(null);
+  const [hover, setHover] = useState<Hover | null>(null);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -103,6 +113,26 @@ export function Plan({ project, layout, summary, tool, setTool, brush, gradient,
   const tileAt = (p: Pt): Tile | undefined =>
     layout.tiles.find((tl) => p.x >= tl.x && p.x <= tl.x + tl.w && p.y >= tl.y && p.y <= tl.y + tl.h);
 
+  /**
+   * What a paint click at `p` targets: a leg under the cursor; otherwise the clicked
+   * tile's corner leg, edge legs or — from the centre — all of its legs.
+   */
+  const paintTargets = (p: Pt): { node?: Node; tile?: Tile; keys: string[] } => {
+    const node = nearestNode(p);
+    if (node) return { node, keys: [node.key] };
+    const tile = tileAt(p);
+    if (!tile?.enabled) return { tile, keys: [] };
+    const nodes = tile.nodes.map((k) => layout.nodeByKey.get(k)!);
+    const xs = nodes.map((n) => n.x);
+    const ys = nodes.map((n) => n.y);
+    const u = (p.x - tile.x) / tile.w;
+    const v = (p.y - tile.y) / tile.h;
+    const ex = u < EDGE ? Math.min(...xs) : u > 1 - EDGE ? Math.max(...xs) : null;
+    const ey = v < EDGE ? Math.min(...ys) : v > 1 - EDGE ? Math.max(...ys) : null;
+    const picked = nodes.filter((n) => (ex === null || n.x === ex) && (ey === null || n.y === ey));
+    return { tile, keys: picked.map((n) => n.key) };
+  };
+
   const rectOf = (a: Pt, b: Pt) => ({
     x0: Math.min(a.x, b.x),
     x1: Math.max(a.x, b.x),
@@ -125,9 +155,15 @@ export function Plan({ project, layout, summary, tool, setTool, brush, gradient,
       return;
     }
     const box = wrapRef.current!.getBoundingClientRect();
-    const node = nearestNode(p);
-    const tile = node ? undefined : tileAt(p);
-    setHover(node || tile ? { node, tile, px: { x: e.clientX - box.left, y: e.clientY - box.top } } : null);
+    const px = { x: e.clientX - box.left, y: e.clientY - box.top };
+    if (tool === 'paint') {
+      const target = paintTargets(p);
+      setHover(target.node || target.tile ? { ...target, px } : null);
+    } else {
+      const node = nearestNode(p);
+      const tile = node ? undefined : tileAt(p);
+      setHover(node || tile ? { node, tile, keys: [], px } : null);
+    }
   };
 
   const onUp = (e: RPointerEvent<SVGSVGElement>) => {
@@ -139,9 +175,7 @@ export function Plan({ project, layout, summary, tool, setTool, brush, gradient,
 
     if (!moved) {
       if (tool === 'paint') {
-        const n = nearestNode(a);
-        const tl = n ? undefined : tileAt(a);
-        const keys = n ? [n.key] : tl?.enabled ? tl.nodes : [];
+        const { keys } = paintTargets(a);
         if (keys.length) dispatch({ type: 'paint', keys, value: brush.id });
       } else if (tool === 'shape') {
         const tl = tileAt(a);
@@ -256,10 +290,20 @@ export function Plan({ project, layout, summary, tool, setTool, brush, gradient,
             <CutsLayer tiles={layout.tiles} />
             <NodesLayer nodes={layout.nodes} colorOf={colorOf} summary={summary} r={px(dotR)} px={px} showLabels={showLabels} unit={unit} />
 
-            {hover?.tile && (
+            {hover?.tile && !drag && (
               <rect className="hover-tile" x={hover.tile.x} y={hover.tile.y} width={hover.tile.w} height={hover.tile.h} strokeWidth={px(2)} />
             )}
-            {hover?.node && <circle className="hover-node" cx={hover.node.x} cy={hover.node.y} r={px(dotR + 4)} strokeWidth={px(2)} />}
+            {hover?.node && !drag && tool !== 'paint' && (
+              <circle className="hover-node" cx={hover.node.x} cy={hover.node.y} r={px(dotR + 4)} strokeWidth={px(2)} />
+            )}
+            {tool === 'paint' && !drag && hover?.keys.length ? (
+              <g className="paint-preview" style={{ ['--c' as string]: brush.color }}>
+                {hover.keys.map((k) => {
+                  const n = layout.nodeByKey.get(k);
+                  return n ? <circle key={k} cx={n.x} cy={n.y} r={px(dotR + 4)} strokeWidth={px(2.5)} /> : null;
+                })}
+              </g>
+            ) : null}
 
             {marquee && (
               <g className={`marquee marquee--${tool}`}>
@@ -301,9 +345,18 @@ export function Plan({ project, layout, summary, tool, setTool, brush, gradient,
                 <div className="tip-line muted">{t('hoverTiles', { n: hover.node.tiles.length })}</div>
               </>
             ) : hover.tile ? (
-              <div className="tip-line">
-                {toUnit(hover.tile.w, unit)} × {toUnit(hover.tile.h, unit)} {unit}
-              </div>
+              <>
+                {tool === 'paint' && hover.keys.length > 0 && (
+                  <div className="tip-head">
+                    <i className="dot" style={{ background: brush.color }} />
+                    <strong>{fmtLen(brush.height, unit)}</strong>
+                    <span>→ {t('paintLegs', { n: hover.keys.length })}</span>
+                  </div>
+                )}
+                <div className="tip-line muted">
+                  {toUnit(hover.tile.w, unit)} × {toUnit(hover.tile.h, unit)} {unit}
+                </div>
+              </>
             ) : null}
           </div>
         )}

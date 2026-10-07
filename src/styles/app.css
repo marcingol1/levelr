@@ -718,6 +718,11 @@ kbd {
   stroke: var(--ink);
   pointer-events: none;
 }
+.plan .paint-preview circle {
+  fill: none;
+  stroke: var(--c);
+  pointer-events: none;
+}
 .plan .marquee rect {
   fill: color-mix(in srgb, var(--accent) 10%, transparent);
   stroke: var(--accent);
