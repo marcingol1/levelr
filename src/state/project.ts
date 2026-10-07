@@ -117,7 +117,7 @@ export type Action =
   | { type: 'paint'; keys: string[]; value: HeightValue }
   | { type: 'paintMany'; values: Record<string, HeightValue> }
   | { type: 'setTiles'; keys: string[]; enabled: boolean }
-  | { type: 'addLevels'; levels: Omit<Level, 'id' | 'color'>[] }
+  | { type: 'addLevels'; levels: (Omit<Level, 'id' | 'color'> & { id?: string })[] }
   | { type: 'updateLevel'; id: string; patch: Partial<Omit<Level, 'id'>> }
   | { type: 'removeLevel'; id: string }
   | { type: 'setBaseLevel'; id: string }
@@ -150,7 +150,7 @@ export function reduce(p: Project, a: Action): Project {
     }
     case 'addLevels': {
       const levels = [...p.levels];
-      for (const l of a.levels) levels.push({ ...l, id: uid(), color: nextColor(levels) });
+      for (const l of a.levels) levels.push({ ...l, id: l.id ?? uid(), color: nextColor(levels) });
       return { ...p, levels };
     }
     case 'updateLevel':

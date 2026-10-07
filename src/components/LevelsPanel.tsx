@@ -5,7 +5,7 @@ import { padDeduction, type Summary } from '../lib/summary';
 import { slopeColor, slopeRange } from '../lib/colors';
 import { fmtLen, parseLenList } from '../lib/units';
 import { useT } from '../i18n';
-import type { Action, Level, Project, Unit } from '../state/project';
+import { uid, type Action, type Level, type Project, type Unit } from '../state/project';
 import { LengthField } from './ui';
 
 interface Props {
@@ -38,13 +38,18 @@ export function LevelsPanel({ project: p, summary, brushId, setBrush, unit, disp
     const values = parseLenList(bulk, unit);
     if (!values.length) return;
     const n0 = p.levels.length;
-    dispatch({ type: 'addLevels', levels: values.map((height, i) => ({ height, name: t('levelName', { n: n0 + i + 1 }) })) });
+    const levels = values.map((height, i) => ({ id: uid(), height, name: t('levelName', { n: n0 + i + 1 }) }));
+    dispatch({ type: 'addLevels', levels });
+    // A new level is what you want to paint with next.
+    setBrush(levels[0].id);
     setBulk('');
   };
 
   const addOne = () => {
     const last = p.levels[p.levels.length - 1];
-    dispatch({ type: 'addLevels', levels: [{ height: Math.min(MAX_HEIGHT, (last?.height ?? 70) + 20), name: t('levelName', { n: p.levels.length + 1 }) }] });
+    const id = uid();
+    dispatch({ type: 'addLevels', levels: [{ id, height: Math.min(MAX_HEIGHT, (last?.height ?? 70) + 20), name: t('levelName', { n: p.levels.length + 1 }) }] });
+    setBrush(id);
   };
 
   return (
@@ -152,7 +157,7 @@ function LevelRow({
       : `> ${MAX_HEIGHT}`;
 
   return (
-    <li className={`level ${active ? 'is-active' : ''}`} style={{ ['--c' as string]: level.color }}>
+    <li className={`level ${active ? 'is-active' : ''}`} style={{ ['--c' as string]: level.color }} onClick={onSelect}>
       <button type="button" role="radio" aria-checked={active} className="swatch" onClick={onSelect} title={index < 9 ? `${index + 1}` : undefined}>
         <span className="sr-only">{level.name}</span>
         {index < 9 && <kbd aria-hidden>{index + 1}</kbd>}

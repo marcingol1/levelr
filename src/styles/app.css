@@ -838,6 +838,9 @@ kbd {
   min-width: 0;
   white-space: nowrap;
 }
+.level:not(.level--slope) {
+  cursor: pointer;
+}
 .level:hover {
   background: var(--surface-2);
 }
