@@ -322,6 +322,9 @@ export function Plan({ project, layout, summary, tool, setTool, brush, gradient,
         <span className="keys" aria-hidden>
           P · S · G · 1–9 · ⌘Z
         </span>
+        <span className="build" title="Build">
+          {__BUILD__}
+        </span>
       </footer>
     </section>
   );

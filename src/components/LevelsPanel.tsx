@@ -157,7 +157,7 @@ function LevelRow({
       : `> ${MAX_HEIGHT}`;
 
   return (
-    <li className={`level ${active ? 'is-active' : ''}`} style={{ ['--c' as string]: level.color }} onClick={onSelect}>
+    <li className={`level ${active ? 'is-active' : ''}`} style={{ ['--c' as string]: level.color }} onPointerDown={onSelect}>
       <button type="button" role="radio" aria-checked={active} className="swatch" onClick={onSelect} title={index < 9 ? `${index + 1}` : undefined}>
         <span className="sr-only">{level.name}</span>
         {index < 9 && <kbd aria-hidden>{index + 1}</kbd>}

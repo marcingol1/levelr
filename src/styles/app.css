@@ -783,6 +783,10 @@ kbd {
   font-family: var(--font-mono);
   font-weight: 600;
 }
+.stage-foot .build {
+  font-family: var(--font-mono);
+  opacity: 0.6;
+}
 .stage-foot .keys {
   margin-left: auto;
   font-family: var(--font-mono);
@@ -1273,6 +1277,9 @@ td.muted {
   }
   .stage-foot .keys {
     display: none;
+  }
+  .stage-foot .build {
+    margin-left: auto;
   }
   .section {
     padding: 16px;
