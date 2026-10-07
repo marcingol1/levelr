@@ -1,8 +1,10 @@
-/** Colour for free (slope) heights: a single-hue ramp from light to deep. */
+/**
+ * Colour for free (slope) heights: a neutral graphite ramp, light = low, deep = high,
+ * kept apart from the categorical level colours so slopes never read as a named level.
+ */
 export function slopeColor(h: number, min: number, max: number): string {
   const t = max > min ? (h - min) / (max - min) : 0.5;
-  const l = 74 - t * 42;
-  return `hsl(28 ${38 + t * 22}% ${l}%)`;
+  return `hsl(215 ${12 + t * 6}% ${76 - t * 46}%)`;
 }
 
 export function slopeRange(values: number[]): [number, number] {

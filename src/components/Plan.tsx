@@ -217,7 +217,13 @@ export function Plan({ project, layout, summary, tool, setTool, brush, gradient,
         <div className="stage-hint">{toolHint}</div>
       </div>
 
-      <div className={`plan-wrap tool-${tool}`} ref={wrapRef} onPointerLeave={() => setHover(null)}>
+      <div
+        className={`plan-wrap tool-${tool}`}
+        ref={wrapRef}
+        // On narrow screens the plan box follows the terrace's proportions (plus room for dimensions).
+        style={{ ['--aspect' as string]: `${(W + 0.3 * Math.max(W, D)) / (D + 0.3 * Math.max(W, D))}` }}
+        onPointerLeave={() => setHover(null)}
+      >
         {layout.tiles.length === 0 ? (
           <p className="plan-empty">{t('emptyPlan')}</p>
         ) : (
