@@ -181,15 +181,17 @@ function LevelRow({
         onCommit={(v) => dispatch({ type: 'updateLevel', id: level.id, patch: { height: v } })}
       />
       <span className="level-tools">
-        {isBase ? (
-          <span className="base-tag" title={t('base')}>
-            {t('base')}
-          </span>
-        ) : (
-          <button type="button" className="icon-btn icon-btn--sm" title={t('makeBase')} aria-label={t('makeBase')} onClick={() => dispatch({ type: 'setBaseLevel', id: level.id })}>
-            <Star size={13} />
-          </button>
-        )}
+        <button
+          type="button"
+          className={`icon-btn icon-btn--sm ${isBase ? 'is-base' : ''}`}
+          title={isBase ? t('base') : t('makeBase')}
+          aria-label={isBase ? t('base') : t('makeBase')}
+          aria-pressed={isBase}
+          disabled={isBase}
+          onClick={() => dispatch({ type: 'setBaseLevel', id: level.id })}
+        >
+          <Star size={13} fill={isBase ? 'currentColor' : 'none'} />
+        </button>
         <button
           type="button"
           className="icon-btn icon-btn--sm"
@@ -208,6 +210,7 @@ function LevelRow({
         <span className="sep">·</span>
         <span>
           {count} {t(count === 1 ? 'leg' : 'legs')}
+          {isBase && ` · ${t('base')}`}
         </span>
       </span>
     </li>
