@@ -1,0 +1,72 @@
+:root {
+  color-scheme: light;
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* surfaces — warm drafting paper */
+  --bg: #f4f2ec;
+  --surface: #fbfaf7;
+  --surface-2: #efece4;
+  --surface-sunk: #e9e5dc;
+  --ink: #1b1c1a;
+  --ink-2: #55574f;
+  --ink-3: #8a8b82;
+  --line: #e3dfd5;
+  --line-strong: #cdc8bb;
+
+  /* brand — pine, after the RENOPAD PRO fixing collar */
+  --accent: #1f5f55;
+  --accent-hover: #184d45;
+  --accent-ink: #ffffff;
+  --accent-soft: #dfece8;
+
+  --warn: #9a5410;
+  --warn-soft: #f6ead9;
+  --danger: #b42318;
+  --danger-soft: #f8e1dd;
+
+  /* plan */
+  --plan-bg: #ebe8e0;
+  --plan-dot: #d7d2c6;
+  --tile: #fdfcf9;
+  --tile-edge: #cbc5b6;
+  --cut-hatch: rgba(27, 28, 26, 0.16);
+  --node-ring: #fdfcf9;
+  --zone-opacity: 0.2;
+
+  --radius: 10px;
+  --radius-sm: 7px;
+  --shadow-pop: 0 1px 2px rgba(27, 28, 26, 0.06), 0 8px 28px rgba(27, 28, 26, 0.12);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #111312;
+    --surface: #171a18;
+    --surface-2: #1e2220;
+    --surface-sunk: #0d0f0e;
+    --ink: #ecede8;
+    --ink-2: #b1b4ab;
+    --ink-3: #7c8078;
+    --line: #272b29;
+    --line-strong: #383d3a;
+    --accent: #6cc2ae;
+    --accent-hover: #86d3c1;
+    --accent-ink: #0c1412;
+    --accent-soft: #1b322c;
+    --warn: #e5a35a;
+    --warn-soft: #2e2416;
+    --danger: #f08b7e;
+    --danger-soft: #34191a;
+    --plan-bg: #0f1110;
+    --plan-dot: #222624;
+    --tile: #1f2321;
+    --tile-edge: #3a3f3c;
+    --cut-hatch: rgba(236, 237, 232, 0.13);
+    --node-ring: #111312;
+    --zone-opacity: 0.3;
+    --shadow-pop: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+}
